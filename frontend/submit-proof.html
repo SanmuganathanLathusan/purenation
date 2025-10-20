@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Submit Proof - Pure Nation</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <style>
+    .proof-section {
+      padding: 50px 20px;
+      background: #f2f2f2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .proof-form {
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .proof-form label {
+      font-weight: bold;
+      margin-top: 15px;
+      display: block;
+    }
+
+    .proof-form input,
+    .proof-form textarea,
+    .proof-form select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .proof-form button {
+      margin-top: 20px;
+    }
+
+    .success-message {
+      color: green;
+      margin-top: 15px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Header -->
+  <nav class="navbar">
+    <div class="container">
+      <div class="navbar-content">
+        <a href="index.html" class="logo">
+          <i class="fas fa-leaf"></i><span>PureNation</span>
+        </a>
+        <div class="nav-links" id="navLinks">
+          <a href="index.html" class="nav-link">Home</a>
+          <a href="events.html" class="nav-link">Events</a>
+          <a href="leaderboard.html" class="nav-link">Leaderboard</a>
+          <a href="signin.html" class="nav-link"><button class="btn-primary">Get Involved</button></a>
+        </div>
+        <button class="menu-toggle" id="menuToggle">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Proof Submission Section -->
+  <section class="proof-section">
+    <h2>Submit Your Volunteer Proof</h2>
+    <form class="proof-form" id="proofForm">
+      <label for="event">Event Name</label>
+      <input type="text" id="event" name="event" required>
+
+      <label for="hours">Number of Hours Contributed</label>
+      <input type="number" id="hours" name="hours" required min="1">
+
+      <label for="file">Upload Image/Proof (jpg, png, pdf)</label>
+      <input type="file" id="file" name="file" accept="image/*,application/pdf" required>
+
+      <label for="description">Description</label>
+      <textarea id="description" name="description" rows="4" placeholder="What did you do during the event?"
+        required></textarea>
+
+      <button type="submit" class="btn-primary">Submit Proof</button>
+      <div class="success-message" id="successMessage"></div>
+    </form>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-info">
+          <a href="index.html" class="logo">
+            <i class="fas fa-leaf"></i><span>Pure Nation</span>
+          </a>
+          <p>Working together to create a cleaner, greener Sri Lanka through community action and environmental
+            awareness.</p>
+          <div class="social-links">
+            <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="social-link"><i class="fas fa-envelope"></i></a>
+          </div>
+        </div>
+        <div class="footer-links">
+          <h3>Resources</h3>
+          <ul>
+            <li><a href="get-involved.html">How to Volunteer</a></li>
+            <li><a href="sponsor.html">Sponsorship Opportunities</a></li>
+            <li><a href="#">Education Materials</a></li>
+            <li><a href="#">Waste Management Tips</a></li>
+          </ul>
+        </div>
+        <div class="footer-contact">
+          <h3>Contact Us</h3>
+          <p>Have questions or suggestions? We'd love to hear from you.</p>
+          <form id="contactForm">
+            <input type="email" placeholder="Your email" required />
+            <textarea placeholder="Your message" rows="3" required></textarea>
+            <button type="submit" class="btn-primary">Send Message</button>
+          </form>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; <span id="currentYear"></span> Pure Nation. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('proofForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      document.getElementById('successMessage').textContent = "Thank you! Your proof has been submitted.";
+      this.reset();
+    });
+
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+  </script>
+
+</body>
+
+</html>

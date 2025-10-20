@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Profile - Pure Nation</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .profile-section {
+      background-color: #f8f9fa;
+      padding: 50px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .profile-card {
+      background: #fff;
+      padding: 30px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      text-align: left;
+    }
+
+    .profile-card p {
+      margin: 12px 0;
+      font-size: 1rem;
+    }
+
+    .profile-card button {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Header -->
+  <nav class="navbar">
+    <div class="container">
+      <div class="navbar-content">
+        <a href="index.html" class="logo">
+          <i class="fas fa-leaf"></i><span>PureNation</span>
+        </a>
+        <div class="nav-links" id="navLinks">
+          <a href="index.html" class="nav-link">Home</a>
+          <a href="events.html" class="nav-link">Events</a>
+          <a href="leaderboard.html" class="nav-link">Leaderboard</a>
+          <span id="auth-section"></span>
+        </div>
+        <button class="menu-toggle" id="menuToggle">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Profile Content -->
+  <section class="profile-section">
+    <h2>Your Profile</h2>
+    <div class="profile-card" id="profileCard">
+      <p>Loading your profile...</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-info">
+          <a href="index.html" class="logo">
+            <i class="fas fa-leaf"></i><span>Pure Nation</span>
+          </a>
+          <p>Working together to create a cleaner, greener Sri Lanka through community action and environmental
+            awareness.</p>
+          <div class="social-links">
+            <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="social-link"><i class="fas fa-envelope"></i></a>
+          </div>
+        </div>
+        <div class="footer-links">
+          <h3>Resources</h3>
+          <ul>
+            <li><a href="get-involved.html">How to Volunteer</a></li>
+            <li><a href="sponsor.html">Sponsorship Opportunities</a></li>
+            <li><a href="#">Education Materials</a></li>
+            <li><a href="#">Waste Management Tips</a></li>
+          </ul>
+        </div>
+        <div class="footer-contact">
+          <h3>Contact Us</h3>
+          <p>Have questions or suggestions? We'd love to hear from you.</p>
+          <form id="contactForm">
+            <input type="email" placeholder="Your email" required />
+            <textarea placeholder="Your message" rows="3" required></textarea>
+            <button type="submit" class="btn-primary">Send Message</button>
+          </form>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; <span id="currentYear"></span> Pure Nation. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+    // Show auth buttons
+    document.addEventListener('DOMContentLoaded', () => {
+      const authSection = document.getElementById('auth-section');
+      const userId = localStorage.getItem('userId');
+      const userName = localStorage.getItem('userName');
+
+      if (authSection) {
+        if (userId) {
+          authSection.innerHTML = `
+          <a href="profile.html" class="nav-link">Profile</a>
+          <a href="#" class="nav-link" onclick="logout()" style="color: red;">Log Out</a>
+        `;
+        } else {
+          authSection.innerHTML = `
+          <a href="signin.html" class="nav-link">Sign In</a>
+          <a href="register.html" class="nav-link"><button class="btn-primary">Get Involved</button></a>
+        `;
+        }
+      }
+    });
+
+    // Load user profile
+    document.addEventListener('DOMContentLoaded', async () => {
+      const profileCard = document.getElementById('profileCard');
+      const userId = localStorage.getItem('userId');
+
+      if (!userId) {
+        profileCard.innerHTML = `<p>Please sign in to view your profile.</p>`;
+        return;
+      }
+
+      try {
+        const res = await fetch(`http://localhost:5000/api/user/profile?userId=${userId}`);
+        const data = await res.json();
+
+        if (!res.ok || !data.name) {
+          throw new Error(data.message || 'Could not load profile');
+        }
+
+        profileCard.innerHTML = `
+        <p><strong>Name:</strong> ${data.name}</p>
+        <p><strong>Email:</strong> ${data.email}</p>
+        <p><strong>District:</strong> ${data.district}</p>
+        <p><strong>City:</strong> ${data.city}</p>
+        <p><strong>Total Volunteer Hours:</strong> ${data.volunteerHours}</p>
+        <p><strong>Events Participated:</strong> ${data.eventsParticipated}</p>
+        <button class="btn-primary" onclick="window.location.href='submit-proof.html'">Submit Proof of Activity</button>
+      `;
+      } catch (err) {
+        console.error(err);
+        profileCard.innerHTML = `<p>Error: ${err.message}</p>`;
+      }
+    });
+
+    function logout() {
+      localStorage.removeItem('userId');
+      localStorage.removeItem('userName');
+      alert('Logged out successfully!');
+      window.location.href = 'index.html';
+    }
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leaderboard - Pure Nation</title>
+  <meta name="description" content="Top volunteers and contributors to Sri Lanka's cleanup efforts" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    .leaderboard-page {
+      padding: 3rem 0;
+    }
+
+    .leaderboard-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2rem;
+    }
+
+    .leaderboard-tab {
+      padding: 1rem 2rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+
+    .leaderboard-tab.active {
+      border-bottom: 2px solid var(--primary);
+      color: var(--primary);
+      font-weight: 500;
+    }
+
+    .achievement-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.5rem;
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      color: var(--card);
+      background-color: var(--text-light);
+    }
+
+    .achievement-badge i {
+      margin-right: 0.25rem;
+    }
+
+    .badge-gold {
+      background-color: #fbbf24;
+    }
+
+    .badge-silver {
+      background-color: #94a3b8;
+    }
+
+    .badge-bronze {
+      background-color: #b45309;
+    }
+
+    .rank-1 .leaderboard-item {
+      background-color: rgba(251, 191, 36, 0.1);
+    }
+
+    .rank-2 .leaderboard-item {
+      background-color: rgba(148, 163, 184, 0.1);
+    }
+
+    .rank-3 .leaderboard-item {
+      background-color: rgba(180, 83, 9, 0.1);
+    }
+
+    .full-leaderboard {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .leaderboard-row {
+      background-color: var(--card);
+      border-radius: 0.5rem;
+      overflow: hidden;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .user-achievements {
+      padding: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 768px) {
+      .leaderboard-tab {
+        padding: 0.75rem 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="header"></div>
+
+
+  <!-- Page Header -->
+  <section class="hero" style="padding: 5rem 0;">
+    <div class="hero-overlay"></div>
+    <div class="container">
+      <div class="hero-content">
+        <h1>Volunteer Leaderboard</h1>
+        <p>Recognizing the dedication and hard work of our most active community members</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Leaderboard Section -->
+  <section class="leaderboard-page">
+    <div class="container">
+      <div class="leaderboard-tabs">
+        <div class="leaderboard-tab active" data-tab="all-time">All Time</div>
+        <div class="leaderboard-tab" data-tab="monthly">This Month</div>
+        <div class="leaderboard-tab" data-tab="weekly">This Week</div>
+      </div>
+      <div class="full-leaderboard" id="fullLeaderboard"></div>
+    </div>
+  </section>
+
+  <!-- Replace the <script> section near the bottom of your file with this -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const tabs = document.querySelectorAll('.leaderboard-tab');
+      const leaderboardContainer = document.getElementById('fullLeaderboard');
+
+      async function fetchLeaderboard(type = 'all-time') {
+        try {
+          const response = await fetch(`http://localhost:5000/api/leaderboard?type=${type}`);
+          if (!response.ok) throw new Error('Failed to load leaderboard');
+          const data = await response.json();
+          loadLeaderboard(data);
+        } catch (err) {
+          leaderboardContainer.innerHTML = `<p class="error">${err.message}</p>`;
+        }
+      }
+
+      function loadLeaderboard(data) {
+        leaderboardContainer.innerHTML = '';
+        data.forEach((user, index) => {
+          const row = document.createElement('div');
+          row.className = `leaderboard-row rank-${index + 1}`;
+
+          let rankIcon = `<span>${index + 1}</span>`;
+          if (index === 0) rankIcon = `<i class="fas fa-trophy" style="color: #fbbf24;"></i>`;
+          else if (index === 1) rankIcon = `<i class="fas fa-medal" style="color: #94a3b8;"></i>`;
+          else if (index === 2) rankIcon = `<i class="fas fa-medal" style="color: #b45309;"></i>`;
+
+          const profileImgSrc = user.profilePicture
+            ? `http://localhost:5000${user.profilePicture}`
+            : `https://i.pravatar.cc/150?u=${user.id}`;
+
+
+
+          row.innerHTML = `
+      <div class="leaderboard-item">
+        <div class="leaderboard-rank">${rankIcon}</div>
+        <div class="leaderboard-avatar">
+          <img src="${profileImgSrc}" alt="${user.name}">
+        </div>
+        <div class="leaderboard-info">
+          <div class="leaderboard-name">${user.name}</div>
+          <div class="leaderboard-stats">${user.eventsParticipated} events • ${user.hoursContributed} hours</div>
+        </div>
+        <div class="leaderboard-points">
+          <div class="points-value">${user.points.toLocaleString()}</div>
+          <div class="points-label">points</div>
+        </div>
+      </div>
+    `;
+          leaderboardContainer.appendChild(row);
+        });
+      }
+
+
+
+      // Load all-time leaderboard by default
+      fetchLeaderboard();
+
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          const type = tab.getAttribute('data-tab');
+          fetchLeaderboard(type);
+        });
+      });
+    });
+  </script>
+
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-info">
+          <a href="index.html" class="logo">
+            <i class="fas fa-leaf"></i><span>Pure Nation</span>
+          </a>
+          <p>Working together to create a cleaner, greener Sri Lanka through community action and environmental
+            awareness.</p>
+          <div class="social-links">
+            <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="social-link"><i class="fas fa-envelope"></i></a>
+          </div>
+        </div>
+        <div class="footer-links">
+          <h3>Resources</h3>
+          <ul>
+            <li><a href="get-involved.html">How to Volunteer</a></li>
+            <li><a href="sponsor.html">Sponsorship Opportunities</a></li>
+            <li><a href="#">Education Materials</a></li>
+            <li><a href="#">Waste Management Tips</a></li>
+          </ul>
+        </div>
+        <div class="footer-contact">
+          <h3>Contact Us</h3>
+          <p>Have questions or suggestions? We'd love to hear from you.</p>
+          <form id="contactForm">
+            <input type="email" placeholder="Your email" required />
+            <textarea placeholder="Your message" rows="3" required></textarea>
+            <button type="submit" class="btn-primary">Send Message</button>
+          </form>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; <span id="currentYear"></span> Pure Nation. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script src="script.js"></script>
+
+  <script>
+    // Load the header and update the auth buttons
+    fetch("header.html").then(res => res.text()).then(html => {
+      document.getElementById("header").innerHTML = html;
+
+      // Wait for header content to render before modifying auth-section
+      const authSection = document.getElementById('auth-section');
+      const userId = localStorage.getItem('userId');
+      const userName = localStorage.getItem('userName');
+
+      if (authSection) {
+        if (userId && userName) {
+          authSection.innerHTML = `
+          <a href="profile.html" class="nav-link">My Profile</a>
+          <a href="#" class="nav-link" onclick="logout()" style="color: red;">Logout</a>
+        `;
+        } else {
+          authSection.innerHTML = `
+          <a href="signin.html" class="nav-link">Sign In</a>
+          <a href="register.html" class="nav-link">
+            <button class="btn-primary">Get Involved</button>
+          </a>
+        `;
+        }
+      }
+    });
+
+    // Global logout function
+    function logout() {
+      localStorage.removeItem('userId');
+      localStorage.removeItem('userName');
+      alert('Logged out successfully.');
+      window.location.href = 'index.html';
+    }
+
+    // Set the current year in the footer
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('currentYear').textContent = new Date().getFullYear();
+    });
+
+    // Leaderboard script
+    document.addEventListener('DOMContentLoaded', () => {
+      const tabs = document.querySelectorAll('.leaderboard-tab');
+      const leaderboardContainer = document.getElementById('fullLeaderboard');
+
+      async function fetchLeaderboard(type = 'all-time') {
+        try {
+          const response = await fetch(`http://localhost:5000/api/leaderboard?type=${type}`);
+          if (!response.ok) throw new Error('Failed to load leaderboard');
+          const data = await response.json();
+          loadLeaderboard(data);
+        } catch (err) {
+          leaderboardContainer.innerHTML = `<p class="error">${err.message}</p>`;
+        }
+      }
+
+      function loadLeaderboard(data) {
+        leaderboardContainer.innerHTML = '';
+        data.forEach((user, index) => {
+          const row = document.createElement('div');
+          row.className = `leaderboard-row rank-${index + 1}`;
+
+          let rankIcon = `<span>${index + 1}</span>`;
+          if (index === 0) rankIcon = `<i class="fas fa-trophy" style="color: #fbbf24;"></i>`;
+          else if (index === 1) rankIcon = `<i class="fas fa-medal" style="color: #94a3b8;"></i>`;
+          else if (index === 2) rankIcon = `<i class="fas fa-medal" style="color: #b45309;"></i>`;
+
+          const profileImgSrc = user.profilePicture
+            ? `http://localhost:5000${user.profilePicture}`
+            : `https://i.pravatar.cc/150?u=${user.id}`;
+
+          row.innerHTML = `
+          <div class="leaderboard-item">
+            <div class="leaderboard-rank">${rankIcon}</div>
+            <div class="leaderboard-avatar">
+              <img src="${profileImgSrc}" alt="${user.name}">
+            </div>
+            <div class="leaderboard-info">
+              <div class="leaderboard-name">${user.name}</div>
+              <div class="leaderboard-stats">${user.eventsParticipated} events • ${user.hoursContributed} hours</div>
+            </div>
+            <div class="leaderboard-points">
+              <div class="points-value">${user.points.toLocaleString()}</div>
+              <div class="points-label">points</div>
+            </div>
+          </div>
+        `;
+          leaderboardContainer.appendChild(row);
+        });
+      }
+
+      // Default load: all-time
+      fetchLeaderboard();
+
+      // Tab click events
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          const type = tab.getAttribute('data-tab');
+          fetchLeaderboard(type);
+        });
+      });
+    });
+  </script>
+
+</body>
+
+</html>
